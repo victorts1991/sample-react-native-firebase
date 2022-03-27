@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
-import { ActivityIndicator, Alert } from 'react-native'
-import { Container, PreLoader, LinkToLogin } from './styles'
-
+import { Alert } from 'react-native'
+import { LinkToLogin } from './styles'
+import { DefaultContainer } from '../../components/DefaultContainer'
+import { Loader } from '../../components/Loader'
 import { Input } from '../../components/Input'
 import { DefaultButton } from '../../components/DefaultButton'
 
@@ -61,15 +62,11 @@ export function Signup ({ navigation }) {
     }
 
     if(isLoading){
-        return(
-          <PreLoader>
-            <ActivityIndicator size="large" color="#9E9E9E"/>
-          </PreLoader>
-        )
-      }    
+        return <Loader />
+    }    
 
     return (
-        <Container>
+        <DefaultContainer>
             <Input
                 placeholder="Nome"
                 value={fieldName}
@@ -89,7 +86,7 @@ export function Signup ({ navigation }) {
 
             <DefaultButton 
                 onPress={() => registerUser()}
-                label="Signup"
+                label="Cadastrar"
             />
 
             <LinkToLogin 
@@ -97,7 +94,7 @@ export function Signup ({ navigation }) {
             >
                 Já é registrado? Clique aqui para fazer o login.
             </LinkToLogin>              
-        </Container>
+        </DefaultContainer>
     
     )
 }
