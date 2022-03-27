@@ -22,17 +22,18 @@ export function RootStack() {
         headerTitleStyle: {
           fontWeight: 'bold',
         },
-      }}>
+      }}
+    >
       <Stack.Screen 
         name="Signup" 
         component={Signup} 
-        options={{ title: 'Signup' }}
+        options={{ title: 'Cadastro' }}
       />       
       <Stack.Screen 
         name="Login" 
         component={Login} 
         options={
-          {title: 'Login'}
+          {title: 'Acesso'}
         }
       />
       <Stack.Screen 
