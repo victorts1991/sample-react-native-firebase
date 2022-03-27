@@ -7,7 +7,7 @@ import { Message } from '../../components/Message'
 import { Container, ChatContainer, SendContainer, SendInput, SendButton, SendButtonLabel, LoadMoreButton } from './styles'
 
 let subscriber = null
-const qtdPerPage = 10
+const qtdPerPage = 3
 
 export function Chat ({ navigation }) {
 
@@ -53,7 +53,7 @@ export function Chat ({ navigation }) {
         function onError(error) {
             console.error(error);
         }
-        
+        console.log('limit ---> ', limit)
         subscriber = firestore()
                         .collection('Messages')
                         .orderBy('createdOn', 'asc')
@@ -83,6 +83,13 @@ export function Chat ({ navigation }) {
                     .then(() => {
                         console.log('Message added!')
                         clearField()
+                        //get total messages
+                        firestore()
+                        .collection('Messages')
+                        .get()
+                        .then(querySnapshot => {
+                            setQtdMessages(querySnapshot.size)
+                        })
                     })
             }
         })
