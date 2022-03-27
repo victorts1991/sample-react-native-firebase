@@ -62,3 +62,6 @@ buck-out/
 
 # testing
 /coverage
+
+fake.google-services.json
+real.google-services.json
