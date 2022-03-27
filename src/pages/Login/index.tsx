@@ -26,7 +26,7 @@ export function Login ({ navigation })  {
             auth()
                 .signInWithEmailAndPassword(fieldEmail, fieldPassword)
                 .then((res) => {
-                    console.log(res)
+                    //console.log(res)
                     clearFields()
                     setIsLoading(false)
                     navigation.navigate('Chat')
@@ -34,7 +34,7 @@ export function Login ({ navigation })  {
             .catch(error => {
                 setIsLoading(false)
                 Alert.alert('Atenção', 'Dados incorretos, por favor tente novamente com outros dados.')
-                console.error(error)
+                console.log('login error --->', error)
             })
         }
     }
