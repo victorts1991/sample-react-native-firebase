@@ -42,3 +42,7 @@ export const LoadMoreButton = styled.TouchableOpacity`
     align-items: center;
 `
 
+export const ActivityIndicator = styled.ActivityIndicator`
+    margin-top: 10px;
+`
+

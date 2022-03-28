@@ -1,20 +1,23 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { View, Alert, Text, Keyboard } from 'react-native'
 import auth from '@react-native-firebase/auth'
 import firestore from '@react-native-firebase/firestore'
 import { Header } from '../../components/Header'
 import { Message } from '../../components/Message'
-import { Container, ChatContainer, SendContainer, SendInput, SendButton, SendButtonLabel, LoadMoreButton } from './styles'
+import { Container, ChatContainer, SendContainer, SendInput, SendButton, SendButtonLabel, LoadMoreButton, ActivityIndicator } from './styles'
 
 let subscriber = null
-const qtdPerPage = 5
+const qtdPerPage = 10
 
 export function Chat ({ navigation }) {
+
+    const scrollViewRef = useRef<any>(null)
 
     const [messages, setMessages] = useState([])
     const [qtdMessages, setQtdMessages] = useState(0)
     const [sendText, setSendText] = useState('')
     const [limit, setLimit] = useState(qtdPerPage)
+    const [isLoadingMore, setIsLoadingMore] = useState(false)
     const [screenHeightWithoutScrollView, setScreenHeightWithoutScrollView] = useState(140)
 
     useEffect(() => {
@@ -41,7 +44,18 @@ export function Chat ({ navigation }) {
 
     useEffect(() => {
         messagesListener()
+        setTimeout(() => {
+            setIsLoadingMore(false)
+        }, 1000)
     }, [limit])
+
+    useEffect(() => {
+        if(!isLoadingMore){
+            setTimeout(() => {
+                scrollViewRef.current?.scrollToEnd({ animated: true })
+            }, 1000)
+        }
+    }, [messages])
 
     function messagesListener() {
         if(subscriber){
@@ -50,10 +64,10 @@ export function Chat ({ navigation }) {
         console.log('limit ---> ', limit)
         subscriber = firestore()
                         .collection('Messages')
-                        .orderBy('createdOn', 'asc')
+                        .orderBy('createdOnTimestamp', 'desc')
                         .limit(limit)
                         .onSnapshot((QuerySnapshot) => {
-                            setMessages(QuerySnapshot.docs)
+                            setMessages(QuerySnapshot.docs.reverse())
                         }, (error) => {
                             console.error(error);
                         })
@@ -72,7 +86,7 @@ export function Chat ({ navigation }) {
     }
 
     function sendMessage () {
-
+        Keyboard.dismiss()
         if(sendText.length === 0){
             Alert.alert('Atenção', 'O campo mensagem é obrigatório.')
         }
@@ -84,7 +98,8 @@ export function Chat ({ navigation }) {
                     .add({
                         author: user.displayName,
                         message: sendText,
-                        createdOn: new Date().toLocaleString()
+                        createdOn: new Date().toLocaleString(),
+                        createdOnTimestamp: new Date().getTime()
                     })
                     .then(() => {
                         console.log('Message added!')
@@ -95,6 +110,7 @@ export function Chat ({ navigation }) {
                         .get()
                         .then(querySnapshot => {
                             setQtdMessages(querySnapshot.size)
+                            setLimit(limit + 1)
                         })
                     })
             }
@@ -105,14 +121,26 @@ export function Chat ({ navigation }) {
     return (
         <Container>
             <Header navigation={navigation}/>
-            <ChatContainer screenHeightWithoutScrollView={screenHeightWithoutScrollView}>
+            <ChatContainer 
+                screenHeightWithoutScrollView={screenHeightWithoutScrollView}
+                ref={scrollViewRef} 
+            >
+                
                 {
-                    qtdMessages > messages.length &&
+                    isLoadingMore ?
+                    <ActivityIndicator size="large" color="#9E9E9E"/>
+                    :
+                    qtdMessages > messages.length ?
                     <LoadMoreButton
-                        onPress={() => setLimit(limit + qtdPerPage)}
+                        onPress={() => {
+                            setIsLoadingMore(true)
+                            setLimit(limit + qtdPerPage)
+                        }}
                     >
                         <Text>Carregar mais antigas</Text>
                     </LoadMoreButton>
+                    :
+                    <View style={{height: 40}}></View>
                 }
                 {
                     messages.map((value, index) => {

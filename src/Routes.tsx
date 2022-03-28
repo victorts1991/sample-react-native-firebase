@@ -40,7 +40,7 @@ export function RootStack() {
        name="Chat" 
        component={Chat} 
        options={
-         { title: 'Chat' } 
+         { title: 'Chat', headerLeft: null } 
        }
       />
     </Stack.Navigator>
