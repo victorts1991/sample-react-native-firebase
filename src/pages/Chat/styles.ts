@@ -1,13 +1,13 @@
 import styled from 'styled-components/native'
 import { Dimensions } from 'react-native'
 
-export const Container = styled.View`
+export const Container = styled.KeyboardAvoidingView`
 
 `
 
 export const ChatContainer = styled.ScrollView`
     background: #E5E0DA;
-    height: ${Dimensions.get('window').height - 140}px;
+    height: ${(props) => (Dimensions.get('window').height - props.screenHeightWithoutScrollView) }px;
     width: 100%;
 `
 

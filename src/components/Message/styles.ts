@@ -3,7 +3,7 @@ import styled from 'styled-components/native'
 export const Container = styled.View`
     background: #FFF;
     padding: 15px;
-    margin: 20px 20px 0px 20px;
+    margin: ${(props) => props.index === 0 ? '20px' : '0px' } 20px 20px 20px;
     border-radius: 10px;
 `
 

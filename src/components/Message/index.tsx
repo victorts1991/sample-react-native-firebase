@@ -6,11 +6,12 @@ interface IMessage{
     author: string;
     text: string;
     createdOn: string;
+    index: number;
 }
 
-export function Message({author, text, createdOn}: IMessage){
+export function Message({author, text, createdOn, index}: IMessage){
     return (
-        <Container>
+        <Container index={index}>
             <NameContainer>{ author }</NameContainer>
             <TextContainer>{ text}</TextContainer>
             <DateContainer>{ createdOn }</DateContainer>

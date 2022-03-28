@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { View, Alert, Text } from 'react-native'
+import { View, Alert, Text, Keyboard } from 'react-native'
 import auth from '@react-native-firebase/auth'
 import firestore from '@react-native-firebase/firestore'
 import { Header } from '../../components/Header'
@@ -7,7 +7,7 @@ import { Message } from '../../components/Message'
 import { Container, ChatContainer, SendContainer, SendInput, SendButton, SendButtonLabel, LoadMoreButton } from './styles'
 
 let subscriber = null
-const qtdPerPage = 3
+const qtdPerPage = 5
 
 export function Chat ({ navigation }) {
 
@@ -15,22 +15,49 @@ export function Chat ({ navigation }) {
     const [qtdMessages, setQtdMessages] = useState(0)
     const [sendText, setSendText] = useState('')
     const [limit, setLimit] = useState(qtdPerPage)
+    const [screenHeightWithoutScrollView, setScreenHeightWithoutScrollView] = useState(140)
 
     useEffect(() => {
-        function onResult(QuerySnapshot) {
-            setMessages(QuerySnapshot.docs)
-        }
-          
-        function onError(error) {
-            console.error(error);
-        }
+        messagesListener()
+        const keyboardDidShowListener = Keyboard.addListener(
+            'keyboardDidShow',
+            (e) => {
+                setScreenHeightWithoutScrollView(e.endCoordinates.height + 185)
+            }
+          )
+          const keyboardDidHideListener = Keyboard.addListener(
+            'keyboardDidHide',
+            () => {
+                setScreenHeightWithoutScrollView(140)
+            }
+          )
+      
+          return () => {
+            keyboardDidHideListener.remove()
+            keyboardDidShowListener.remove()
+            subscriber()
+          }
+    }, [])
 
+    useEffect(() => {
+        messagesListener()
+    }, [limit])
+
+    function messagesListener() {
+        if(subscriber){
+            subscriber()
+        }
+        console.log('limit ---> ', limit)
         subscriber = firestore()
                         .collection('Messages')
                         .orderBy('createdOn', 'asc')
                         .limit(limit)
-                        .onSnapshot(onResult, onError)
-        
+                        .onSnapshot((QuerySnapshot) => {
+                            setMessages(QuerySnapshot.docs)
+                        }, (error) => {
+                            console.error(error);
+                        })
+
         //get total messages
         firestore()
             .collection('Messages')
@@ -38,28 +65,7 @@ export function Chat ({ navigation }) {
             .then(querySnapshot => {
                 setQtdMessages(querySnapshot.size)
             })
-        
-        return () => subscriber()
-    }, [])
-
-    useEffect(() => {
-        if(subscriber){
-            subscriber()
-        }
-        function onResult(QuerySnapshot) {
-            setMessages(QuerySnapshot.docs)
-        }
-          
-        function onError(error) {
-            console.error(error);
-        }
-        console.log('limit ---> ', limit)
-        subscriber = firestore()
-                        .collection('Messages')
-                        .orderBy('createdOn', 'asc')
-                        .limit(limit)
-                        .onSnapshot(onResult, onError)
-    }, [limit])
+    }
 
     function clearField () {
         setSendText('')
@@ -99,7 +105,7 @@ export function Chat ({ navigation }) {
     return (
         <Container>
             <Header navigation={navigation}/>
-            <ChatContainer>
+            <ChatContainer screenHeightWithoutScrollView={screenHeightWithoutScrollView}>
                 {
                     qtdMessages > messages.length &&
                     <LoadMoreButton
@@ -110,7 +116,7 @@ export function Chat ({ navigation }) {
                 }
                 {
                     messages.map((value, index) => {
-                        return <View key={index}><Message author={value._data.author} text={value._data.message} createdOn={value._data.createdOn}/></View>
+                        return <View key={index}><Message index={index} author={value._data.author} text={value._data.message} createdOn={value._data.createdOn}/></View>
                     })
                 }
             </ChatContainer>
